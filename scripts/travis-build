@@ -1,0 +1,39 @@
+#!/bin/sh
+
+set -e
+set -x
+
+repo_name="$(basename $PWD)"
+repo_dir="$PWD"
+
+# drop qubes- prefix
+repo_name=${repo_name#qubes-}
+
+# go to builder main directory
+cd "$(dirname $0)/.."
+
+# place all the sources (including builder plugins) in the same directory as
+# target component
+ln -s "$(dirname $repo_dir)" qubes-src
+
+# use specific builder conf for Travis-CI builds
+export BUILDERCONF=scripts/travis-builder.conf
+
+if [ -z "$DISTS_VM" -a -z "$DIST_DOM0" ]; then
+    echo "Specify either DISTS_VM or DIST_DOM0 in .travis.yml" >&2
+    exit 1
+fi
+
+if [ -z "$USE_QUBES_REPO_VERSION" ]; then
+    echo "Specify target Qubes version with USE_QUBES_REPO_VERSION in .travis.yml" >&2
+    exit 1
+fi
+
+# install required packages
+make install-deps
+
+# download builder plugins
+make get-sources
+
+# and compile
+make COMPONENTS=$repo_name qubes
