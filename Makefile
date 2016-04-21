@@ -299,7 +299,6 @@ template-local-%::
 	if [ "0$(TEMPLATE_ROOT_IMG_ONLY)" -eq "1" ]; then \
 		MAKE_TARGET=rootimg-build; \
 	fi; \
-; \
 	export GNUPGHOME="$(BUILDER_DIR)/keyrings/template-$$DIST"; \
 	mkdir -m 700 -p "$$GNUPGHOME"; \
 	export DIST NO_SIGN TEMPLATE_FLAVOR TEMPLATE_OPTIONS; \
