@@ -53,6 +53,23 @@ if [ ! -e /usr/share/debootstrap/scripts/stretch ]; then
     sudo ln -s sid /usr/share/debootstrap/scripts/stretch
 fi
 
+# and old sfdisk (missing gpt support), get it from xenial
+if [ "$TEMPLATE_ROOT_WITH_PARTITIONS" -eq 1 ]; then
+    pushd cache
+    wget http://archive.ubuntu.com/ubuntu/pool/main/u/util-linux/libsmartcols1_2.27.1-6ubuntu3_amd64.deb
+    wget http://archive.ubuntu.com/ubuntu/pool/main/u/util-linux/libfdisk1_2.27.1-6ubuntu3_amd64.deb
+    wget http://archive.ubuntu.com/ubuntu/pool/main/u/util-linux/util-linux_2.27.1-6ubuntu3_amd64.deb
+    sha256sum -c <<EOF
+044ae71864ecd0ec1ae05029d9a202f988c0cc97fde007fbfa7eff0d8a5fff0b  libfdisk1_2.27.1-6ubuntu3_amd64.deb
+fb4dd8b8fa63b81a493655e3f32b99d4cd385acee28a9778cab1e5b5a6b1a417  libsmartcols1_2.27.1-6ubuntu3_amd64.deb
+209bbcbddfc6ef4ebe3f9ffc9af8366b4309d950248c4a274d0914e440139ed2  util-linux_2.27.1-6ubuntu3_amd64.deb
+EOF
+    sudo dpkg -i libsmartcols1_*deb libfdisk1_*deb
+    dpkg-deb -x util-linux_*deb util-linux
+    sudo cp -f util-linux/sbin/sfdisk /sbin/sfdisk
+    popd
+fi
+
 # download builder plugins
 make get-sources COMPONENTS='$(BUILDER_PLUGINS)'
 
