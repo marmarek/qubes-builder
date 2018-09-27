@@ -51,9 +51,19 @@ make install-deps
 
 sudo apt-get -y install dpkg-dev debootstrap
 
-if ! getent group mock >/dev/null; then
-    # mock require group with this specific name
-    sudo groupadd mock
+if [ "0$RPM_USE_MOCKBUILD" -eq 1 ]; then
+    # get newer mock from bionic
+    wget http://archive.ubuntu.com/ubuntu/pool/universe/m/mock/mock_1.3.2-2_all.deb
+    sha256sum -c <<EOF
+1eb102c121f112863172d0e4c32e5131d68f86ecc7323f7e03fadf8c71fd1c2f  mock_1.3.2-2_all.deb
+EOF
+    sudo dpkg -i mock*deb
+    sudo apt-get -f install
+    
+    if ! getent group mock >/dev/null; then
+        # mock require group with this specific name
+        sudo groupadd mock
+    fi
 fi
 
 if [ ! -e /usr/share/debootstrap/scripts/stretch ]; then
